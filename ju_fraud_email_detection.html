@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Safety Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-800">Email Safety Checker</h1>
+            <p class="text-gray-600">Enter email details below to see if it's safe or potentially fraudulent.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Input Side -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Sender Address</label>
+                        <input id="sender" type="text" placeholder="e.g. john.smith@company.com" class="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Subject</label>
+                        <input id="subject" type="text" placeholder="e.g. Weekly Meeting" class="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Message Body</label>
+                        <textarea id="body" rows="5" placeholder="Paste the email content here..." class="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 outline-none"></textarea>
+                    </div>
+                    <button onclick="analyzeEmail()" class="w-full bg-blue-600 text-white py-2 rounded font-medium hover:bg-blue-700 transition">Analyze Email</button>
+                </div>
+            </div>
+
+            <!-- Result Side -->
+            <div id="resultPanel" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center justify-center text-center">
+                <div id="statusMessage">
+                    <h2 class="text-xl font-semibold text-gray-800">Ready to Analyze</h2>
+                    <p class="text-gray-500 mt-2">Fill out the details on the left and click "Analyze" to see if the email is safe.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function analyzeEmail() {
+            const sender = document.getElementById('sender').value.toLowerCase();
+            const subject = document.getElementById('subject').value.toLowerCase();
+            const body = document.getElementById('body').value.toLowerCase();
+            const panel = document.getElementById('resultPanel');
+            const message = document.getElementById('statusMessage');
+
+            let riskScore = 0;
+
+            // Simple danger check logic
+            const dangerKeywords = ['urgent', 'password', 'login', 'suspended', 'money', 'wire', 'account', 'blocked'];
+            const suspiciousDomains = ['.xyz', '.top', '.info', '.cc'];
+
+            dangerKeywords.forEach(word => {
+                if (subject.includes(word) || body.includes(word)) riskScore += 1;
+            });
+
+            suspiciousDomains.forEach(domain => {
+                if (sender.includes(domain)) riskScore += 3;
+            });
+
+            // Update UI based on risk
+            if (riskScore >= 2) {
+                // RED (DANGER)
+                panel.className = "bg-red-50 border-2 border-red-500 p-6 rounded-lg shadow-sm flex flex-col items-center justify-center text-center";
+                message.innerHTML = `
+                    <div class="text-red-600 text-5xl mb-4">⚠️</div>
+                    <h2 class="text-2xl font-bold text-red-800">Danger: Fraud Detected!</h2>
+                    <p class="text-red-700 mt-2">This email shows signs of phishing. Do not click any links or share information.</p>
+                `;
+            } else {
+                // GREEN (SAFE)
+                panel.className = "bg-green-50 border-2 border-green-500 p-6 rounded-lg shadow-sm flex flex-col items-center justify-center text-center";
+                message.innerHTML = `
+                    <div class="text-green-600 text-5xl mb-4">✅</div>
+                    <h2 class="text-2xl font-bold text-green-800">Safe / Verified</h2>
+                    <p class="text-green-700 mt-2">This email looks normal and does not contain obvious red flags.</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
